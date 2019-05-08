@@ -1,9 +1,32 @@
 const express = require('express');
 const router = express.Router();
+const {
+    check,
+    validationResult
+} = require('express-validator/check')
 
-//@route  GET api/users
+//@route  POST api/users
 //@desc   Testing route
 //@access Public
-router.get('/', (req, res) => res.send('User route'));
+router.post('/', [
+    check('name', 'Name is required')
+    .not()
+    .isEmpty(),
+    check('email', 'Please provide a valid email')
+    .isEmail(),
+    check('password', 'Please enter a password with 8 or more characters')
+    .isLength({
+        min: 8
+    })
+], (req, res) => {
+    const errors = validationResult(req);
+    // Sets status to bad request & sends messages
+    if (!errors.isEmpty()) {
+        return res.status(400).json({
+            errors: errors.array()
+        });
+    }
+    res.send('User route')
+});
 
 module.exports = router;

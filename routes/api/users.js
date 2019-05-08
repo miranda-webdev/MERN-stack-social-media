@@ -13,7 +13,6 @@ const User = require('../../models/User');
 
 
 //@route  POST api/users
-//@desc   Testing route
 //@access Public
 router.post('/', [
     check('name', 'Name is required')

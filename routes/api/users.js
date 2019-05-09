@@ -39,7 +39,7 @@ router.post('/', [
     } = req.body;
 
     try {
-        //Testing if use exists
+        //Testing if user exists
         let user = await User.findOne({
             email
         });

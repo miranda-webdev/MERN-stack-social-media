@@ -120,7 +120,6 @@ router.post('/', [
 //@route  GET api/profile
 //@desc   Get all profiles
 //@access Public
-
 router.get('/', async (req, res) => {
     try {
         const profiles = await Profile.find().populate('user', ['name', 'avatar']);
@@ -134,7 +133,6 @@ router.get('/', async (req, res) => {
 //@route  Get api/profile/user/:user_id
 //@desc   Get profile by user ID
 //@access Public
-
 router.get('/user/:user_id', async (req, res) => {
     try {
         const profile = await Profile.findOne({
@@ -162,7 +160,6 @@ router.get('/user/:user_id', async (req, res) => {
 //@route  DELETE api/profile
 //@desc   Delete profile, user & posts
 //@access Private
-
 router.delete('/', auth, async (req, res) => {
     try {
         //@todo - remove users posts
@@ -182,6 +179,57 @@ router.delete('/', auth, async (req, res) => {
     } catch (err) {
         console.error(err.message);
         res.status(500).send(`Server Error: ${err.message}`);
+    }
+});
+
+//@route  PUT api/profile/experience
+//@desc   Add profile experience
+//@access Private
+router.put('/experience', [auth, [
+    check('title', 'Title is required').not().isEmpty(),
+    check('company', 'Company is required').not().isEmpty(),
+    check('from', 'From date is required').not().isEmpty(),
+]], async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({
+            errors: errors.array()
+        });
+    }
+
+    //destructuring
+    const {
+        title,
+        company,
+        location,
+        from,
+        to,
+        current,
+        description
+    } = req.body;
+
+    const newExp = {
+        title,
+        company,
+        location,
+        from,
+        to,
+        current,
+        description
+    }
+
+    try {
+        const profile = await Profile.findOne({ user: req.user.id });
+
+        //move all recent changes to the beginning of the array
+        profile.experience.unshift(newExp);
+
+        await profile.save();
+        res.json(profile);
+
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send(`Server Error ${err.message}`)
     }
 });
 
